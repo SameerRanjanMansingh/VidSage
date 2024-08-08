@@ -3,7 +3,7 @@ from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 
-preprocessor = ColumnTransformer(
+column_transformer = ColumnTransformer(
     transformers=[
         ('num', StandardScaler(), ['views', 'likes', 'dislikes', 'comment_count']),
         ('cat', OneHotEncoder(), ['channel_title', 'comments_disabled', 'ratings_disabled']),
