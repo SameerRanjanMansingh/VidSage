@@ -1,30 +1,114 @@
-# -*- coding: utf-8 -*-
-import click
+import pathlib
+import pandas as pd
 import logging
-from pathlib import Path
-from dotenv import find_dotenv, load_dotenv
+
+from src.features.build_features import initial_process, text_cleaning, add_new_feature
+from logger_module.my_logger import setup_custom_logger
 
 
-@click.command()
-@click.argument('input_filepath', type=click.Path(exists=True))
-@click.argument('output_filepath', type=click.Path())
-def main(input_filepath, output_filepath):
-    """ Runs data processing scripts to turn raw data from (../raw) into
-        cleaned data ready to be analyzed (saved in ../processed).
+logger = setup_custom_logger("my_app", log_level=logging.INFO, log_file="model.log")
+
+
+
+
+def read_csv(file_path: str) -> pd.DataFrame:
     """
-    logger = logging.getLogger(__name__)
-    logger.info('making final data set from raw data')
+    Reads a CSV file and returns a dataframe.
+    
+    Parameters:
+    file_path (str): Path to the CSV file.
+    
+    Returns:
+    pd.DataFrame: Dataframe containing the CSV data.
+    """
+    try:
+        df = pd.read_csv(file_path)
+        return df
+    except FileNotFoundError as e:
+        print(f"FileNotFoundError: {e} - Please check if the file path is correct.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+
+def main(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Processes the dataframe by cleaning text and applying initial processing.
+    
+    Parameters:
+    df (pd.DataFrame): Input dataframe.
+    
+    Returns:
+    pd.DataFrame: Processed dataframe.
+    """
+    try:
+        df = initial_process(df)
+        df["title"] = df["title"].apply(text_cleaning)
+        df["tags"] = df["tags"].apply(text_cleaning)
+        df["description"] = df["description"].apply(text_cleaning)
+
+        df["title"] = df["title"].apply(lambda x: x.replace(" | ", " "))
+        df["tags"] = df["tags"].apply(lambda x: x.replace("|", " ").replace('"', ''))
+
+        return df
+    except KeyError as e:
+        print(f"KeyError: {e} - Please check if the column names are correct.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+
+def description_data_process(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Processes the dataframe to add a new feature and clean the 'row_summary' column.
+    
+    Parameters:
+    df (pd.DataFrame): Input dataframe.
+    
+    Returns:
+    pd.DataFrame: Dataframe with processed 'row_summary' feature.
+    """
+    try:
+        df = add_new_feature(df)
+        df["row_summary"] = df["row_summary"].apply(lambda x: x.replace("|", " ").replace('"', '').replace(" | ", " "))
+        return df
+    except KeyError as e:
+        print(f"KeyError: {e} - Please check if the column names are correct.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+
+
+def save_data(df: pd.DataFrame, file_name: str):
+    """
+    Saves the dataframe to a CSV file in the specified directory.
+    
+    Parameters:
+    df (pd.DataFrame): Dataframe to be saved.
+    file_name (str): Name of the output CSV file.
+    """
+    try:
+        output_path = "/data/processed/"
+        pathlib.Path(output_path).mkdir(parents=True, exist_ok=True)
+        df.to_csv(output_path + file_name, index=False)
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 
 if __name__ == '__main__':
-    log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    logging.basicConfig(level=logging.INFO, format=log_fmt)
+    try:
+        raw_data_path = r".../data/raw/INvideos.csv"
+        data = read_csv(file_path=raw_data_path)
 
-    # not used in this stub but often useful for finding various files
-    project_dir = Path(__file__).resolve().parents[2]
+        data = main(df=data)
+        save_data(df=data, file_name="processed_data.csv")
 
-    # find .env automagically by walking up directories until it's found, then
-    # load up the .env entries as environment variables
-    load_dotenv(find_dotenv())
+        description_data = description_data_process(df=data)
+        save_data(df=description_data, file_name="description_data.csv")
 
-    main()
+        logger.info("Data cleaning completed")
+
+    except FileNotFoundError as e:
+        print(f"FileNotFoundError: {e} - Please check if the file path is correct.")
+    except Exception as e:
+        print(f"An error occurred during execution: {e}")
+
+
