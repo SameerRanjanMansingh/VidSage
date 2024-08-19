@@ -1,0 +1,25 @@
+stages:
+  preprocess:
+    cmd: python src\data\make_dataset.py
+    deps:
+    - src\data\make_dataset.py
+    - data\raw\INvideos.csv
+    outs:
+    - data\processed\processed_data.csv
+  
+  calculate_similarity:
+    cmd:
+    - python src\model\train\train_sscore_model.py
+    deps:
+    - src\features\preprocessor.py
+    - src\data\make_dataset.py
+    - data\processed\processed_data.csv
+  
+  train_vid_desc:
+    cmd:
+    - python src\model\train\train_vid_desc.py
+    deps:
+    - data\processed\processed_data.csv
+    - src\data\make_dataset.py
+    outs:
+    - models\affinity.pkl

@@ -88,7 +88,19 @@ target/
 # Mypy cache
 .mypy_cache/
 
+vidsage/
+
 notebooks/
 
 data_/
 
+readme_images
+
+models
+
+/data
+
+# temporary files
+df.csv
+index.html
+similarity.pkl

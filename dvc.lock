@@ -1,0 +1,51 @@
+schema: '2.0'
+stages:
+  preprocess:
+    cmd: python src\data\make_dataset.py
+    deps:
+    - path: data\raw\INvideos.csv
+      hash: md5
+      md5: 3c14941ad932f2ff8ca372031ea53020
+      size: 59600439
+    - path: src\data\make_dataset.py
+      hash: md5
+      md5: a93f293406c139ffb396254e81f1831d
+      size: 4035
+    outs:
+    - path: data\processed\processed_data.csv
+      hash: md5
+      md5: ed7247cdc28d175ec946ad24f4bfa4c6
+      size: 12137267
+  calculate_similarity:
+    cmd:
+    - python src\model\train\train_sscore_model.py
+    deps:
+    - path: data\processed\processed_data.csv
+      hash: md5
+      md5: ed7247cdc28d175ec946ad24f4bfa4c6
+      size: 12137267
+    - path: src\data\make_dataset.py
+      hash: md5
+      md5: a93f293406c139ffb396254e81f1831d
+      size: 4035
+    - path: src\features\preprocessor.py
+      hash: md5
+      md5: 672c116c2da490b8762d82675f3aa4be
+      size: 540
+  train_vid_desc:
+    cmd:
+    - python src\model\train\train_vid_desc.py
+    deps:
+    - path: data\processed\processed_data.csv
+      hash: md5
+      md5: ed7247cdc28d175ec946ad24f4bfa4c6
+      size: 12137267
+    - path: src\data\make_dataset.py
+      hash: md5
+      md5: a93f293406c139ffb396254e81f1831d
+      size: 4035
+    outs:
+    - path: models\affinity.pkl
+      hash: md5
+      md5: fbb0296fb3f206b251771195a601b3de
+      size: 802227412
