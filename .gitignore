@@ -94,7 +94,7 @@ notebooks/
 
 data_/
 
-readme_images
+
 
 models
 
@@ -104,3 +104,5 @@ models
 df.csv
 index.html
 similarity.pkl
+
+app_copy.py
