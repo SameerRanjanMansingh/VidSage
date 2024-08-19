@@ -1,7 +1,6 @@
 import re
 
 
-
 def initial_process(df):
     """
     Initial processing of the dataframe.
@@ -15,19 +14,19 @@ def initial_process(df):
     """
     try:
         # Drop duplicate rows
-        df = df.drop_duplicates(keep='first')
+        df = df.drop_duplicates(subset=['video_id'], keep='first', inplace=False)
 
         # Filter out rows where 'video_error_or_removed' is True
         df = df[df['video_error_or_removed'] == False]
-        
+
         # Drop the 'video_error_or_removed' column
         df.drop(columns=["video_error_or_removed"], inplace=True)
-        
+
         # Fill NaN values in 'description' column
         df.loc[df.description.isnull(), "description"] = "Information not available"
-        
+
         return df
-    
+
     except KeyError as e:
         print(f"KeyError: {e} - Please check if the column names are correct.")
     except Exception as e:
@@ -49,12 +48,12 @@ def text_cleaning(text):
         cleaned_text = re.sub(r'https?://\S+|www\.\S+', '', text)
         # Remove hyperlinks that have typical URL structure with domain and possibly a path
         cleaned_text = re.sub(r'\b[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b(?!\S)', '', cleaned_text)
-        
+
         # Removing new lines and commas
         cleaned_text = cleaned_text.replace('\\n', '').replace(',', '')
-        
+
         return cleaned_text
-    
+
     except Exception as e:
         print(f"An error occurred: {e}")
 
@@ -83,12 +82,11 @@ def add_new_feature(df):
             title = {row["title"]},
             channel_title = {row["channel_title"]},
             description = {row["description"]}''', axis=1
-            ).apply(lambda x: x.replace('\n',''))
-        
+        ).apply(lambda x: x.replace('\n', ''))
+
         return df
-    
+
     except KeyError as e:
         print(f"KeyError: {e} - Please check if the column names are correct.")
     except Exception as e:
         print(f"An error occurred: {e}")
-
