@@ -1,101 +1,35 @@
-# updated app.py
-from flask import Flask, render_template, request, session, redirect, url_for
-from flask import Flask, render_template,request
-import mlflow
 import pickle
-import os
-import pandas as pd
 
-import numpy as np
-import pandas as pd
-import os
-
-
-
-
-# Set up DagsHub credentials for MLflow tracking
-# dagshub_token = os.getenv("DAGSHUB_PAT")
-# if not dagshub_token:
-#     raise EnvironmentError("DAGSHUB_PAT environment variable is not set")
-
-# os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
-# os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
-
-# dagshub_url = "https://dagshub.com"
-# repo_owner = "campusx-official"
-# repo_name = "mlops-mini-project"
-
-# Set up MLflow tracking URI
-# mlflow.set_tracking_uri(f'{dagshub_url}/{repo_owner}/{repo_name}.mlflow')
-
-
-# load model from model registry
-# def get_latest_model_version(model_name):
-#     client = mlflow.MlflowClient()
-#     latest_version = client.get_latest_versions(model_name, stages=["Production"])
-#     if not latest_version:
-#         latest_version = client.get_latest_versions(model_name, stages=["None"])
-#     return latest_version[0].version if latest_version else None
-
-# model_name = "my_model"
-# model_version = get_latest_model_version(model_name)
-
-# model_uri = f'models:/{model_name}/{model_version}'
-# model = mlflow.pyfunc.load_model(model_uri)
-
-# vectorizer = pickle.load(open('models/vectorizer.pkl','rb'))
-
-
-
-
-
-
-
-
-
-
-
-from sentence_transformers import SentenceTransformer, util
-from collections import Counter
-
-import torch
-from transformers import GPT2LMHeadModel, GPT2Tokenizer, AdamW
-
-import numpy as np
+from flask import Flask, render_template, request, session
+from sentence_transformers import SentenceTransformer
 from transformers import pipeline
 
-from src.model.pred.vid_desc import search_result
-from src.model.pred.sscore_predict import get_similar_videos
 from src.data.make_dataset import read_csv
+from src.model.pred.sscore_predict import get_similar_videos
+from src.model.pred.vid_desc import search_result
+
+import secrets
 
 model_name = 'paraphrase-MiniLM-L6-v2'
 model = SentenceTransformer(model_name)
 
-
-
-
 description_data = read_csv(file_path=r"data/processed/description_data.csv")
 processed_data = read_csv(file_path=r"data/processed/processed_data.csv")
 
-
-affinity = pickle.load(open('models/affinity.pkl','rb'))
-
+affinity = pickle.load(open('models/affinity.pkl', 'rb'))
 
 cluster_labels = affinity.labels_
 
-
-similarity = pickle.load(open('models/similarity.pkl','rb'))
-
+similarity = pickle.load(open('models/similarity.pkl', 'rb'))
 
 qa_pipeline = pipeline("question-answering")
+
 
 def answer_question(question, context):
     result = qa_pipeline(question=question, context=context)
     return result['answer']
 
 
-
-import secrets
 app = Flask(__name__)
 app.config['SECRET_KEY'] = secrets.token_hex(16)
 
@@ -108,16 +42,20 @@ def home():
     thumbnail = session.get('thumbnail', None)
     recomendation = session.get('recomendation', None)
 
-    return render_template('index.html', search_details=search_details, query_answer=query_answer, selected_video_id=selected_video_id, thumbnail=thumbnail, recomendation=recomendation)
+    return render_template('index.html', search_details=search_details, query_answer=query_answer,
+                           selected_video_id=selected_video_id, thumbnail=thumbnail, recomendation=recomendation)
+
 
 @app.route('/search', methods=['POST'])
 def search():
     query = request.form['search_query']
 
-    videoid = search_result(query=query, model=model,affinity=affinity, labels=cluster_labels, data=description_data)
+    videoid = search_result(query=query, model=model, affinity=affinity, labels=cluster_labels, data=description_data)
 
-    details = {videoid[i] : {'thumbnail_link': description_data[description_data.video_id == videoid[i]].thumbnail_link.values[0], 
-               'title': description_data[description_data.video_id == videoid[i]].title.values[0]} for i in range(len(videoid))}
+    details = {videoid[i]: {
+        'thumbnail_link': description_data[description_data.video_id == videoid[i]].thumbnail_link.values[0],
+        'title': description_data[description_data.video_id == videoid[i]].title.values[0]} for i in
+        range(len(videoid))}
 
     # return render_template('index.html', thumbnails=thumbnails)
     search_details = session.get('search_details', {})
@@ -143,13 +81,14 @@ def search():
     session['search_details'] = search_details
     session['update_count'] = update_count
 
-
     query_answer = session.get('query_answer')
     selected_video_id = session.get('selected_video_id')
     thumbnail = session.get('thumbnail')
     recomendation = session.get('recomendation')
 
-    return render_template('index.html', search_details=search_details, query_answer=query_answer, selected_video_id=selected_video_id, thumbnail=thumbnail, recomendation=recomendation)
+    return render_template('index.html', search_details=search_details, query_answer=query_answer,
+                           selected_video_id=selected_video_id, thumbnail=thumbnail, recomendation=recomendation)
+
 
 @app.route('/query', methods=['POST'])
 def query():
@@ -166,9 +105,8 @@ def query():
         query_answer = session.get('query_answer')
         recomendation = session.get('recomendation')
 
-
-        return render_template('index.html', search_details=search_details, query_answer=query_answer, selected_video_id=selected_video_id, thumbnail=thumbnail, recomendation=recomendation)
-
+        return render_template('index.html', search_details=search_details, query_answer=query_answer,
+                               selected_video_id=selected_video_id, thumbnail=thumbnail, recomendation=recomendation)
 
 
 @app.route('/video_query', methods=['POST'])
@@ -179,7 +117,6 @@ def video_query():
 
     context = description_data[description_data['video_id'] == selected_video_id[0]].row_summary.values[0]
 
-
     answer = answer_question(question=[query], context=[context])
 
     session['query_answer'] = answer
@@ -189,8 +126,8 @@ def video_query():
     thumbnail = session.get('thumbnail')
     recomendation = session.get('recomendation')
 
-  
-    return render_template('index.html', search_details=search_details, query_answer=answer, selected_video_id=selected_video_id, thumbnail=thumbnail, recomendation=recomendation)
+    return render_template('index.html', search_details=search_details, query_answer=answer,
+                           selected_video_id=selected_video_id, thumbnail=thumbnail, recomendation=recomendation)
 
 
 # @app.route('/like', methods=['POST'])
@@ -201,9 +138,9 @@ def recomend(video_list):
     query_answer = session.get('query_answer')
     selected_video_id = session.get('selected_video_id')
     thumbnail = session.get('thumbnail')
-    
-    return render_template('index.html', search_details=search_details, query_answer=query_answer, selected_video_id=selected_video_id, thumbnail=thumbnail, recomendation=recomendation)
 
+    return render_template('index.html', search_details=search_details, query_answer=query_answer,
+                           selected_video_id=selected_video_id, thumbnail=thumbnail, recomendation=recomendation)
 
 
 if __name__ == "__main__":
