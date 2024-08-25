@@ -1,27 +1,34 @@
 stages:
   preprocess:
-    cmd: python src\data\make_dataset.py
+    cmd: python src/data/make_dataset.py
     deps:
-    - src\data\make_dataset.py
-    - data\raw\INvideos.csv
+    - src/data/make_dataset.py
+    - data/raw/INvideos.csv
     outs:
-    - data\processed\processed_data.csv
+    - data/processed/processed_data.csv
   
   calculate_similarity:
     cmd:
-    - python src\model\train\train_sscore_model.py
+    - python src/model/train/train_sscore_model.py
     deps:
-    - src\features\preprocessor.py
-    - src\data\make_dataset.py
-    - data\processed\processed_data.csv
+    - src/features/preprocessor.py
+    - src/data/make_dataset.py
+    - data/processed/processed_data.csv
     outs:
-    - models\similarity.pkl
+    - models/similarity.pkl
   
   train_vid_desc:
     cmd:
-    - python src\model\train\train_vid_desc.py
+    - python src/model/train/train_vid_desc.py
     deps:
-    - data\processed\processed_data.csv
-    - src\data\make_dataset.py
+    - data/processed/processed_data.csv
+    - src/data/make_dataset.py
     outs:
-    - models\affinity.pkl
+    - models/affinity.pkl
+
+    model_registration:
+    cmd: python src/model/register_model.py
+    deps:
+    - models/affinity.pkl
+    - models/similarity.pkl
+    - src/model/register_model.py
