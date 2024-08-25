@@ -64,6 +64,3 @@ To set up VidSage on your local machine:
 
 VidSage is in active development, and more complexity and features will be added to the codebase in the future. Stay tuned for updates!
 
----
-
-This README should make your project easy to understand and use while highlighting its capabilities.
