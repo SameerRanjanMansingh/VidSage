@@ -88,9 +88,7 @@ def get_similar_videos(data: pd.DataFrame, video_id: list, similarity: list):
     """
     
     results = {}
-    print('--------------------------video id----------------------------',video_id)
     for id in video_id:
-        print('--------------------------id----------------------------',id)
         index = data[data['video_id'] == id].index[0]  # return index number
         distances = sorted(list(enumerate(similarity[index])), reverse=True, key=lambda x: x[1])
         
