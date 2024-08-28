@@ -51,7 +51,7 @@ jobs:
         run: |
           docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/vidsage2:latest .
 
-      -name: Push Docker image to Docker Hub
+      - name: Push Docker image to Docker Hub
         if: success()
         run: |
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/vidsage2:latest .
