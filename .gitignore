@@ -103,6 +103,5 @@ models
 # temporary files
 df.csv
 index.html
-similarity.pkl
 
 app_copy.py
