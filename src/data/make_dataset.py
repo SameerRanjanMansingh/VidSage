@@ -100,22 +100,23 @@ def save_data(df: pd.DataFrame, file_name: str):
 if __name__ == '__main__':
     try:
         IN_raw_data_path = r"data/raw/INvideos.csv"
-        US_raw_data_path = r"data/raw/USvideos.csv"
-        GB_raw_data_path = r"data/raw/GBvideos.csv"
+        # US_raw_data_path = r"data/raw/USvideos.csv"
+        # GB_raw_data_path = r"data/raw/GBvideos.csv"
 
         IN_data = read_csv(file_path=IN_raw_data_path)
-        US_data = read_csv(file_path=US_raw_data_path)
-        GB_data = read_csv(file_path=GB_raw_data_path)
+        # US_data = read_csv(file_path=US_raw_data_path)
+        # GB_data = read_csv(file_path=GB_raw_data_path)
 
         IN = main(df=IN_data)
-        US = main(df=US_data)
-        GB = main(df=GB_data)
+        # US = main(df=US_data)
+        # GB = main(df=GB_data)
 
 
         '''
         data = pd.concat([IN, US, GB], axis=0)
 
         Use whole data for more robust performance
+        I ignored these because of s3 bucket issue, file is too large, takes too long to training
         '''
 
         data=IN.iloc[:10000,:]
