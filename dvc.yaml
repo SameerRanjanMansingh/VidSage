@@ -4,8 +4,6 @@ stages:
     deps:
     - src/data/make_dataset.py
     - data/raw/INvideos.csv
-    outs:
-    - data/processed/processed_data.csv
   
   calculate_similarity:
     cmd:
@@ -14,8 +12,6 @@ stages:
     - src/features/preprocessor.py
     - src/data/make_dataset.py
     - data/processed/processed_data.csv
-    outs:
-    - models/similarity.pkl
   
   train_vid_desc:
     cmd:
@@ -23,8 +19,6 @@ stages:
     deps:
     - data/processed/processed_data.csv
     - src/data/make_dataset.py
-    outs:
-    - models/affinity.pkl
 
   model_registration:
     cmd: python src/model/register_model.py
