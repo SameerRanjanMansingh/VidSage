@@ -44,11 +44,11 @@ jobs:
         run: |
           dvc repro
 
-      - name: Promote model to production
-        if: success()
-        env:
-          DAGSHUB_PAT: ${{ secrets.DAGSHUB_PAT }}
-        run: python scripts/promote_model.py
+      # - name: Promote model to production
+      #   if: success()
+      #   env:
+      #     DAGSHUB_PAT: ${{ secrets.DAGSHUB_PAT }}
+      #   run: python scripts/promote_model.py
 
       - name: Log in to Docker Hub
         if : success()

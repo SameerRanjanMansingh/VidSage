@@ -28,21 +28,19 @@ repo_name = "VidSage"
 mlflow.set_tracking_uri(f'{dagshub_url}/{repo_owner}/{repo_name}.mlflow')
 
 
-def load_model_info(file_path: str) -> dict:
-    """Load the model info from a pickle file."""
-    try:
-        with open(file_path, 'r') as file:
-            model_info = pickle.load(file)
-        logger.debug('Model info loaded from ', file_path)
-        return model_info
-    except FileNotFoundError:
-        logger.error('File not found: ', file_path)
-        raise
-    except Exception as e:
-        logger.error('Unexpected error occurred while loading the model info: ', e)
-        raise
 
-def register_model(model_name: str, model_info: dict):
+#   mlflow.log_param('parameter name', 'value')
+#   mlflow.log_metric('metric name', 1)
+
+def load_model_info(file_path: str):
+    """Load the model info from a pickle file."""
+    model_info = pickle.load(open(file_path, 'rb'))
+    
+    logger.debug('Model info loaded from ', file_path)
+    return model_info
+
+
+def register_model(model_info, model_name):
     """Register the model to the MLflow Model Registry."""
     try:
         model_uri = f"runs:/{model_info['run_id']}/{model_info['model_path']}"
@@ -60,7 +58,7 @@ def register_model(model_name: str, model_info: dict):
         
         logger.debug(f'Model {model_name} version {model_version.version} registered and transitioned to Staging.')
     except Exception as e:
-        logger.error('Error during model registration: ', e)
+        logger.error('Error during model registration: %s', e)
         raise
 
 def main():
@@ -75,7 +73,7 @@ def main():
         register_model(similarity_model_info, "similarity")
 
     except Exception as e:
-        logger.error('Failed to complete the model registration process: ', e)
+        logger.error('Failed to complete the model registration process: %s', e)
         print(f"Error: {e}")
 
 if __name__ == '__main__':

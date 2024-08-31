@@ -20,9 +20,9 @@ stages:
     - data/processed/processed_data.csv
     - src/data/make_dataset.py
 
-  model_registration:
-    cmd: python src/model/register_model.py
-    deps:
-    - models/affinity.pkl
-    - models/similarity.pkl
-    - src/model/register_model.py
+  # model_registration:
+  #   cmd: python src/model/register_model.py
+  #   deps:
+  #   - models/affinity.pkl
+  #   - models/similarity.pkl
+  #   - src/model/register_model.py
