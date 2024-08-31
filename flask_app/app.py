@@ -10,6 +10,7 @@ from src.model.pred.vid_desc import search_result
 
 import secrets
 
+
 model_name = 'paraphrase-MiniLM-L6-v2'
 model = SentenceTransformer(model_name)
 
